@@ -35,7 +35,7 @@ require_once('vypocty.php');
 <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
-            <a class="navbar-brand" href="#">Bakalarka - Martin Holubecky</a>
+            <a class="navbar-brand" href="#">Viacfázové toky v ťažobnej sonde</a>
         </div>
     </div>
 </nav>
@@ -43,8 +43,13 @@ require_once('vypocty.php');
 <div class="container">
 
     <div class="content">
-        <h1>Bakalarna praca - Martin Holubecky</h1>
+        <h1>Bakalárska práca - Martin Holubecký</h1>
+        <h3>Viskozita</h3>
         <div id="graph"></div>
+        <h3>Merna hmotnost ropy</h3>
+        <div id="graphRor"></div>
+        <h3>Objemovy koeficient ropy</h3>
+        <div id="graphBrpT"></div>
     </div>
 
 </div><!-- /.container -->
@@ -61,8 +66,16 @@ require_once('vypocty.php');
 <script src="https://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
 <?php
 $grafData = '';
+$grafDataRor = '';
+$grafDataBrpT = '';
 foreach ($graf as $row) {
     $grafData .= '{x:' . $row['x'] . ', y: ' . $row['y'] . '},';
+}
+foreach ($grafRor as $row) {
+    $grafDataRor .= '{x:' . $row['x'] . ', y: ' . $row['y'] . '},';
+}
+foreach ($grafBrpT as $row) {
+    $grafDataBrpT .= '{x:' . $row['x'] . ', y: ' . $row['y'] . '},';
 }
 ?>
 <script>
@@ -70,10 +83,24 @@ foreach ($graf as $row) {
         element: 'graph',
         data: [<?php echo $grafData; ?>],
         xkey: 'x',
-        ykeys: ['y', 'z'],
-        labels: ['Y', 'Z']
-    }).on('click', function (i, row) {
-        console.log(i, row);
+        ykeys: ['y'],
+        labels: ['X', 'Y']
+    });
+
+    Morris.Line({
+        element: 'graphRor',
+        data: [<?php echo $grafDataRor; ?>],
+        xkey: 'x',
+        ykeys: ['y'],
+        labels: ['X', 'Y']
+    });
+
+    Morris.Line({
+        element: 'graphBrpT',
+        data: [<?php echo $grafDataBrpT; ?>],
+        xkey: 'x',
+        ykeys: ['y'],
+        labels: ['X', 'Y']
     });
 </script>
 </body>
