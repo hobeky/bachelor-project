@@ -41,12 +41,12 @@ function yiMi($yi, $mi)
 // 0.0
 function prop($rop0)
 {
-    return $rop0 / 28.98;
+    return $rop0 / 1.293;
 }
 
-function rop0($pMp)
+function rop0($yiMi)
 {
-    return $pMp / 22.414;
+    return $yiMi / 22.414;
 }
 
 //function pMp()
@@ -72,14 +72,18 @@ function Tred($T, $proup)
 // 1.7
 function zu($pred, $Tred)
 {
-    if ((0 <= $pred and $pred <= 3.8) and ($Tred <= 2 and $Tred >= 1.17)) {
+    if ((0 <= $pred) and ($pred <= 3.8) and ($Tred <= 2) and ($Tred >= 1.17)) {
         $zu = 1 - $pred * ((0.18 / ($Tred - 0.73)) - 0.135) + ((0.16 * pow($pred, 3.45)) / pow($Tred, 6.1));
-    } else if ((0 <= $pred and $pred <= 1.45) and ($Tred <= 1.17 and $Tred >= 1.05)) {
-        $zu = 1 - (0.23 * $pred) - (1.88 - 1.6 * $Tred) * $pred * $pred;
-    } else if ((1.45 <= $pred and $pred <= 4) and ($Tred <= 1.17 and $Tred >= 1.05)) {
-        $zu = 0.13 * $pred + (6.05 * $Tred - 6.26) * ($Tred / ($pred * $pred));
     } else {
-        throw new Exception('Chyba pri vypocte zu // 1.7');
+        if ((0 <= $pred) and ($pred <= 1.45) and ($Tred <= 1.17) and ($Tred >= 1.00)) {
+            $zu = 1 - 0.23 * $pred - (1.88 - 1.6 * $Tred) * $pred * $pred;
+        } else {
+            if ((1.45 <= $pred) and ($pred <= 4) and ($Tred <= 1.17) and ($Tred >= 1.05)) {
+                $zu = 0.13 * $pred + (6.05 * $Tred - 6.26) * ($Tred / ($pred * $pred));
+            } else {
+                throw new Exception('Chyba pri vypocte zu // 1.7');
+            }
+        }
     }
 
     return $zu;
@@ -88,7 +92,7 @@ function zu($pred, $Tred)
 // 1.8
 function zd($T, $p, $yiN)
 {
-    if ($yiN > 0) {
+    if (($yiN > 0) and ($T < 280) and ($T > 380)) {
         // 1.8
         $zd = 1 + 0.564 * 0.0000000001 * pow(($T - 273), 3.71) * pow($p, (14.7 / pow(($T - 273), 0.5)));
     } else {
@@ -178,7 +182,7 @@ function propLpT($gama, $a3, $mT, $prop, $propoppT, $VpoppT, $VprpT)
 // 1.31
 function brpT($rorop, $VprpT, $lamdaT, $mT, $alfar, $T, $p)
 {
-    return 1 + ((1.0733 * 0.001 * $rorop * $VprpT * $lamdaT) / $mT) + $alfar * ($T - 293) - 6.5 * 0.0001 * $p;
+    return 1 + 1.0733 * 0.001 * $rorop * $VprpT * $lamdaT / $mT + $alfar * ($T - 293) - 6.5 * 0.0001 * $p;
 }
 
 // Pomocny vypocet k 1.31
@@ -192,10 +196,12 @@ function alfar($rorop)
 {
     if ($rorop >= 780 and $rorop <= 860) {
         return 0.001 * (3.083 - 2.638 * 0.001 * $rorop);
-    } else if ($rorop >= 860 and $rorop <= 960) {
-        return 0.001 * (2.513 - 1.975 * 0.001 * $rorop);
     } else {
-        throw new Exception('Chyba pri vypocte alfar // 1.32');
+        if ($rorop >= 860 and $rorop <= 960) {
+            return 0.001 * (2.513 - 1.975 * 0.001 * $rorop);
+        } else {
+            throw new Exception('Chyba pri vypocte alfar // 1.32');
+        }
     }
 }
 
@@ -210,10 +216,12 @@ function gamarop($rorop)
 {
     if ($rorop > 845 and $rorop < 924) {
         return (((0.658 * $rorop * $rorop) / (886 * 1000 - $rorop * $rorop)) * ((0.658 * $rorop * $rorop) / (886 * 1000 - $rorop * $rorop)));
-    } else if ($rorop > 780 and $rorop <= 845) {
-        return (((0.456 * $rorop * $rorop) / (833 * 1000 - $rorop * $rorop)) * ((0.456 * $rorop * $rorop) / (833 * 1000 - $rorop * $rorop)));
     } else {
-        throw new Exception('Chyba pri vypocte rorpT // 1.33');
+        if ($rorop > 780 and $rorop <= 845) {
+            return (((0.456 * $rorop * $rorop) / (833 * 1000 - $rorop * $rorop)) * ((0.456 * $rorop * $rorop) / (833 * 1000 - $rorop * $rorop)));
+        } else {
+            throw new Exception('Chyba pri vypocte rorpT // 1.33');
+        }
     }
 }
 
@@ -313,19 +321,31 @@ function gamarN($A4N, $gamaropT, $B4)
 function delta($gamarN)
 {
     if ($gamarN < 5)                                                    // nie sigma ale delta
+    {
         $delta = 0.0114 * $gamarN;
-    else if (($gamarN > 5) && ($gamarN < 10))
-        $delta = 0.057 + 0.023 * ($gamarN - 5);
-    else if (($gamarN > 10) && ($gamarN < 25))
-        $delta = 0.0171 + 0.031 * ($gamarN - 10);
-    else if (($gamarN > 25) && ($gamarN < 45))
-        $delta = 0.643 + 0.045 * ($gamarN - 25);
-    else if (($gamarN > 45) && ($gamarN < 75))
-        $delta = 1.539 + 0.058 * ($gamarN - 45);
-    else if (($gamarN > 75) && ($gamarN < 85))
-        $delta = 3.286 + 0.1 * ($gamarN - 75);
-    else
-        throw new Exception("Chyba pri vypocte delta // 1.48");
+    } else {
+        if (($gamarN > 5) && ($gamarN < 10)) {
+            $delta = 0.057 + 0.023 * ($gamarN - 5);
+        } else {
+            if (($gamarN > 10) && ($gamarN < 25)) {
+                $delta = 0.0171 + 0.031 * ($gamarN - 10);
+            } else {
+                if (($gamarN > 25) && ($gamarN < 45)) {
+                    $delta = 0.643 + 0.045 * ($gamarN - 25);
+                } else {
+                    if (($gamarN > 45) && ($gamarN < 75)) {
+                        $delta = 1.539 + 0.058 * ($gamarN - 45);
+                    } else {
+                        if (($gamarN > 75) && ($gamarN < 85)) {
+                            $delta = 3.286 + 0.1 * ($gamarN - 75);
+                        } else {
+                            throw new Exception("Chyba pri vypocte delta // 1.48");
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     return $delta;
 }
@@ -419,21 +439,26 @@ function bvL($bv, $betavpTL, $p, $pn)
 // Pomocny vypocet
 function rovst($c)
 {
-    if (($c > 0) && ($c <= 12))
+    if (($c > 0) && ($c <= 12)) {
         $rovst = 1000 + 6.95 * $c;
-    else if (($c > 12) && ($c <= 20))
-        $rovst = 1010.5 + 6.08 * $c;
-    else if (($c > 20) && ($c <= 26))
-        $rovst = 1027.1 + 5.25 * $c;
-    else
-        throw new Exception("Chyba co vypocte rovst");
+    } else {
+        if (($c > 12) && ($c <= 20)) {
+            $rovst = 1010.5 + 6.08 * $c;
+        } else {
+            if (($c > 20) && ($c <= 26)) {
+                $rovst = 1027.1 + 5.25 * $c;
+            } else {
+                throw new Exception("Chyba co vypocte rovst");
+            }
+        }
+    }
     return $rovst;
 }
 
 // 1.62
-function rovL($rovst, $bvL)
+function rovL($rovst, $bv)
 {
-    return $rovst / $bvL;
+    return $rovst / $bv;
 }
 
 // 1.64
@@ -489,11 +514,19 @@ function wzmkr($Dt)
 }
 
 // 1.70
+
 function betav($Qv, $Qr)
 {
     return $Qv / ($Qv + $Qr);
+
 }
 
+/*
+function betav($betavst, $brpT)
+{
+    return $betavst / ($betavst + (1 - $betavst) * $brpT);
+}
+*/
 // 1.73
 function sigmarv($sigmavp, $sigmarop)
 {
@@ -507,9 +540,9 @@ function odm($Dt)
 }
 
 // 1.74
-function lambdav($wvred, $wzm, $odm, $sigmarv, $rovp, $rorp)
+function lambdav($wvred, $wzm, $odm, $sigmarv, $rovL, $rorpT)
 {
-    $moc1 = ((4 * $sigmarv * 9.81 * ($rovp - $rorp)) / $rorp * $rorp);
+    $moc1 = ((4 * $sigmarv * 9.81 * ($rovL - $rorpT)) / $rorpT * $rorpT);
     $moc2 = pow($moc1, 0.25);
     return $wvred / ($wzm - (0.425 - ((0.827 * $wzm) / ($odm))) * $moc2);
 }
@@ -533,15 +566,17 @@ function wrred($Qr, $F)
 }
 
 // 1.74a
-function lambdar($sigmarv, $rovp, $rorp, $wrred, $wzm, $betav, $odm)
+function lambdar($sigmarv, $rovL, $rorpT, $wrred, $wzm, $betav, $odm)
 {
-    return ($wrred / ($wzm + (0.54 * (1.01 + pow($betav, 0.152)) - ($wzm / ($odm))) * (pow((4 * $sigmarv * 9.81 * ($rovp - $rorp)) / ($rovp * $rovp), 0.25))));
+    return ($wrred / ($wzm + (0.54 * (1.01 + pow($betav,
+                        0.152)) - ($wzm / ($odm))) * (pow((4 * $sigmarv * 9.81 * ($rovL - $rorpT)) / ($rovL * $rovL),
+                0.25))));
 }
 
 // 1.76a
-function lambdavOdLamdar($lamdar)
+function lambdavOdLamdar($lambdar)
 {
-    return 1 - $lamdar;
+    return 1 - $lambdar;
 }
 
 // 1.83
@@ -562,15 +597,15 @@ function lambdarE($betav)
 }
 
 // 1.x
-function rorv($rorp, $lambdar, $rovp, $lambdav)
+function rorv($rorp, $lambdar, $rovL, $lambdav)
 {
-    return $rorp * $lambdar + $rovp * $lambdav;
+    return $rorp * $lambdar + $rovL * $lambdav;
 }
 
 // 1.86
-function rovr($rorp, $betav, $rovp)
+function rovr($rorpT, $betav, $rovL)
 {
-    return $rorp * (1 - $betav) + $rovp * $betav;
+    return $rorpT * (1 - $betav) + $rovL * $betav;
 }
 
 // 1.87
@@ -587,10 +622,13 @@ function A6($betav, $wzd)
 
 function B6($A6, $gamarN)
 {                                          // 1.88
-    if ($A6 <= 1)
+    if ($A6 <= 1) {
         return $gamarN;
-    else if ($A6 > 1)
-        return $A6 * $gamarN;
+    } else {
+        if ($A6 > 1) {
+            return $A6 * $gamarN;
+        }
+    }
 }
 
 // 1.89
@@ -614,9 +652,11 @@ function omegaT($TL, $T, $h)
     return ($TL - $T) / $h;
 }
 
-function omegaST($Qpo, $Dt, $omegaT)
+function omegaST($Qkst, $Dt, $omegaT)
 {
-    return (0.0034 + 0.79 * $omegaT) / exp($Qpo / (86400 * 20 * exp(2.67 * log($Dt)) * log(10)));
+    $omegaST2 = pow($Dt, 2.67);
+    $omegaST1 = $Qkst / 20 * $omegaST2;
+    return (0.0034 + 0.79 * $omegaT) / pow(10, $omegaST1);
 }
 
 function TU($TL, $omegaST, $h)
@@ -624,9 +664,9 @@ function TU($TL, $omegaST, $h)
     return $TL - $omegaST * $h;
 }
 
-function T($TU, $TL, $p, $pU)
+function T($TU, $TL, $p, $pU, $pL)
 {
-    return $TU + ($TL - $TU) * (($p - $pU) / ($p - $pU));
+    return $TU + ($TL - $TU) * (($p - $pU) / ($pL - $pU));
 }
 
 function pgamak($gamak, $gamav)
@@ -636,17 +676,21 @@ function pgamak($gamak, $gamav)
 
 function c1($pgamak, $Dt, $D0)
 {
-    return ((2.2361 * exp(0.049 * $pgamak)) / (1 + 1.1002 * exp(0.049 * $pgamak))) - 8.17 * 0.001 * pow($pgamak, 0.6) * (($Dt / $D0) - 1);
+    return ((2.2361 * exp(0.049 * $pgamak)) / (1 + 1.1002 * exp(0.049 * $pgamak))) - 8.17 * 0.001 * pow($pgamak,
+            0.6) * (($Dt / $D0) - 1);
 }
 
 function c2($pgamak, $Dt, $D0)
 {
-    if ((1 < $pgamak) && ($pgamak < 40))
+    if ((1 <= $pgamak) && ($pgamak < 40)) {
         return ((1 + 0.1082 * exp(0.049 * $pgamak)) / (1 + 1.1002 * exp(0.049 * $pgamak))) - (0.1006 - 2.52 * 0.001 * ($pgamak - 1)) * (($Dt / $D0) - 1);
-    else if ($pgamak > 40)
-        return (1 + 0.1082 * exp(0.049 * $pgamak)) / (1 + 1.1002 * exp(0.049 * $pgamak));
-    else
-        throw new Exception("Problem vo vypocte c2");
+    } else {
+        if ($pgamak > 40) {
+            return (1 + 0.1082 * exp(0.049 * $pgamak)) / (1 + 1.1002 * exp(0.049 * $pgamak));
+        } else {
+            throw new Exception("Problem vo vypocte c2");
+        }
+    }
 }
 
 function FrZM($wzm, $Dt)
@@ -674,9 +718,9 @@ function lambdaC($rek, $K)
     return 0.067 * pow((158 / ($rek + 2 * $K)), 0.2);
 }
 
-function dpdHTR($lambdaC, $wzm, $roZM, $Dt)
+function dpdHTR($lambdaC, $wzm, $rofiR, $Dt)
 {
-    return ($lambdaC * $wzm * $wzm * $roZM * 0.000001) / (2 * $Dt);
+    return ($lambdaC * $wzm * $wzm * $rofiR * 0.000001) / (2 * $Dt);
 }
 
 function dpdH($roZM, $dpdHTR)
@@ -687,4 +731,15 @@ function dpdH($roZM, $dpdHTR)
 function dHdp($dpdH)
 {
     return 1 / $dpdH;
+}
+
+function fiR($betav, $c1, $c2, $frZM)
+{
+    $fiR1 = pow($frZM, (-0.5));
+    return $betav / ($c1 + $c2 * $fiR1);
+}
+
+function rofiR($roZM, $fiR, $roppT)
+{
+    return $roZM * (1 - $fiR) + $roppT * $fiR;
 }
